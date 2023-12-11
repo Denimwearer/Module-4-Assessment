@@ -1,7 +1,9 @@
 const complimentBtn = document.getElementById("complimentButton");
-const body = document.querySelector("body");
-const fortuneBtn = document.createElement("button");
-const form = document.querySelector("form");
+const fortuneBtn = document.getElementById("fortuneButton");
+const fortuneForm = document.getElementById("fortune-form");
+const fortuneInput = document.getElementById("fortune-input");
+const fortuneContainer = document.querySelector("#fortune-container");
+let globalId = 6;
 
 const getCompliment = () => {
   axios.get("http://localhost:4000/api/compliment").then((res) => {
@@ -11,18 +13,26 @@ const getCompliment = () => {
 };
 
 const getFortune = () => {
-  axios.get("http://localhost:4000/api/fortune").then((res) => {
-    const data = res.data.text;
-    console.log(data);
-    alert(data);
-  });
+  axios
+    .get("http://localhost:4000/api/fortune")
+    .then((res) => {
+      const data = res.data;
+      console.log(data);
+      alert(data.text);
+      displayFortune([data]);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 };
 
 const createFortune = (body) => {
   axios
     .post("http://localhost:4000/api/fortune", body)
     .then((res) => {
-      console.log(res.data);
+      const data = res.data;
+      console.log(data);
+      displayFortune(data);
     })
     .catch((error) => {
       console.log(error);
@@ -35,17 +45,19 @@ const deleteFortune = (id) => {
     .then((res) => {
       const data = res.data;
       console.log(data);
+      displayFortune(data);
     })
     .catch((error) => {
       console.log(error);
     });
 };
 
-const updateFortune = (id, text) => {
+const updateFortune = (id, newText) => {
   axios
-    .put(`http://localhost:4000/api/fortune/${id}`, { text })
+    .put(`http://localhost:4000/api/fortune/${id}`, { text: newText })
     .then((res) => {
       const data = res.data;
+      displayFortune(data);
       console.log(data);
     })
     .catch((error) => {
@@ -53,30 +65,63 @@ const updateFortune = (id, text) => {
     });
 };
 
-const submitHandler = (e) => {
+const handleSubmit = (e) => {
   e.preventDefault();
-  let text = document.querySelector("#fortuneText");
 
   let bodyObj = {
-    text: text.value,
+    id: globalId,
+    text: fortuneInput.value,
   };
 
-  createFortune(bodyObj);
   console.log(bodyObj);
+
+  createFortune(bodyObj);
+
+  globalId++;
+
+  fortuneInput.value = "";
 };
 
-const createFortuneCard = (fortune) => {
+createFortuneCard = (fortune) => {
   const fortuneCard = document.createElement("div");
   fortuneCard.classList.add("fortune-card");
 
-  fortuneCard.innerHTML = `<p> ${fortune.text}</p>`;
+  fortuneCard.innerHTML = `<button onclick="deleteFortune(${fortune.id})">X</button><p>${fortune.text}</p><button onclick="openModal()">Edit</button>`;
 
-  body.appendChild(fortuneCard);
+  fortuneContainer.appendChild(fortuneCard);
 };
+
+const displayFortune = (arr) => {
+  fortuneContainer.innerHTML = ``;
+  for (let i = 0; i < arr.length; i++) {
+    createFortuneCard(arr[i]);
+  }
+};
+
+const openModal = () => {
+  const modal = document.getElementById("updateModal");
+  modal.style.display = "block";
+};
+
+const closeModal = () => {
+  const modal = document.getElementById("updateModal");
+  modal.style.display = "none";
+};
+
+fortuneContainer.addEventListener("click", (event) => {
+  if (event.target.classList.contains("updateFortune")) {
+    openModal();
+    const fortuneIdToUpdate = document
+      .getElementById("update-fortune-form")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+        const newText = document.getElementById("update-fortune-input").value;
+        updateFortune(fortuneIdToUpdate, newText);
+        closeModal();
+      });
+  }
+});
 
 complimentBtn.addEventListener("click", getCompliment);
 fortuneBtn.addEventListener("click", getFortune);
-fortuneBtn.setAttribute("id", "fortuneButton");
-fortuneBtn.textContent = "Get a fortune";
-body.appendChild(fortuneBtn);
-form.addEventListener("submit", submitHandler);
+fortuneForm.addEventListener("submit", handleSubmit);

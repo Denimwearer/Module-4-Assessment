@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Back End Assessment</title>
+    <title>Compliment & Fortune</title>
     <link rel="stylesheet" href="./reset.css">
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body class="container">
     <button id="complimentButton">Get a compliment</button>
-
-    <form>
+    <button id="fortuneButton">Get a fortune</button>
+    <form id="fortune-form">
       <input 
           type='text'
-          id="fortuneText"
+          id="fortune-input"
           placeholder="What's your fortune?"/>
-          <button>Add Fortune</button>
-  </form>
+          <button class="submitFortune">+</button>
+    </form>
+    <div id="fortune-container">
+    
+    </div>
+    <div id="updateModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <form id="update-fortune-form">
+          <label for="update-fortune-input">Update Fortune:</label>
+          <input type="text" id="update-fortune-input" placeholder="Enter new fortune text" />
+          <button type="submit">Update</button>
+        </form>
+      </div>
+    </div>
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="main.js"></script>

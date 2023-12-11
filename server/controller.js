@@ -1,5 +1,5 @@
-const fortunes = require("./db.json");
-let globalId = 7;
+const fortunes = [];
+let globalId = 6;
 
 module.exports = {
   getCompliment: (req, res) => {
@@ -9,7 +9,6 @@ module.exports = {
       "Your Javascript skills are stellar.",
     ];
 
-    // choose random compliment
     let randomIndex = Math.floor(Math.random() * compliments.length);
     let randomCompliment = compliments[randomIndex];
 
@@ -17,11 +16,25 @@ module.exports = {
   },
 
   getFortune: (req, res) => {
-    let randomIndex = Math.floor(Math.random() * fortunes.length);
-    let randomFortune = fortunes[randomIndex];
+    const starterFortunes = [
+      "You will achieve great success in your endeavors.",
+      "A pleasant surprise is in store for you today.",
+      "Your hard work will pay off soon.",
+      "Embrace new opportunities that come your way.",
+      "Good fortune will follow you wherever you go.",
+    ];
 
-    res.status(200).send(randomFortune);
-    console.log(randomFortune);
+    const randomIndex = Math.floor(Math.random() * starterFortunes.length);
+    const randomFortune = starterFortunes[randomIndex];
+
+    const newFortune = {
+      id: randomIndex,
+      text: randomFortune,
+    };
+
+    fortunes.push(newFortune);
+
+    res.status(200).send(newFortune);
   },
 
   createFortune: (req, res) => {
@@ -50,19 +63,24 @@ module.exports = {
 
   updateFortune: (req, res) => {
     const { text } = req.body;
-    let index = fortunes.findIndex((elem) => elem.id === +req.params.id);
+    const id = +req.params.id;
 
-    let editFortune = {
-      text,
-    };
+    if (!text) {
+      return res
+        .status(400)
+        .json({ error: "Text is required for updating fortune." });
+    }
 
-    fortunes.push(editFortune);
-    console.log(editFortune);
-    res.status(200).send(fortunes);
+    const index = fortunes.findIndex((elem) => elem.id === id);
 
     if (index === -1) {
-      res.status(400).send("Can not find fortune");
-      return;
+      return res.status(404).json({ error: "Fortune not found." });
     }
+
+    fortunes[index].text = text;
+
+    res
+      .status(200)
+      .json({ message: "Fortune updated successfully.", fortunes });
   },
 };
